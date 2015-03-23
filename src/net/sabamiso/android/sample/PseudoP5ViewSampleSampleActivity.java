@@ -26,13 +26,13 @@ public class PseudoP5ViewSampleSampleActivity extends Activity {
 	@Override
 	protected void onResume() {
 		super.onResume();
-		view.onResume();
+		view.onResume(); // don't forget to call onResume()!
 		hideSystemUI();
 	}
 
 	@Override
 	protected void onPause() {
-		view.onPause();
+		view.onPause(); // don't forget to call onPause()!
 		super.onPause();
 	}
 
