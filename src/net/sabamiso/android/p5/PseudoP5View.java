@@ -45,6 +45,7 @@ import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Paint.Style;
+import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.util.Log;
@@ -78,6 +79,7 @@ public abstract class PseudoP5View extends SurfaceView implements
 	/////////////////////////////////////////////////////////////////////////////
 
 	protected abstract void setup();
+
 	protected abstract void draw();
 
 	//
@@ -209,8 +211,60 @@ public abstract class PseudoP5View extends SurfaceView implements
 		}
 	}
 
+	protected void bezier(float x1, float y1, float x2, float y2, float x3,
+			float y3, float x4, float y4) {
+		beginShape();
+		vertex(x1, y1);
+		bezierVertex(x2, y2, x3, y3, x4, y4);
+		endShape();
+	}
+
+	Path current_path = null;
+	int current_path_vertex_num = 0;
+
+	protected void beginShape() {
+		current_path = new Path();
+		current_path_vertex_num = 0;
+	}
+
+	protected void vertex(float x, float y) {
+		if (current_path == null)
+			return;
+
+		if (current_path_vertex_num == 0) {
+			current_path.moveTo(x, y);
+		} else {
+			current_path.lineTo(x, y);
+		}
+		current_path_vertex_num++;
+	}
+
+	protected void bezierVertex(float x2, float y2, float x3, float y3,
+			float x4, float y4) {
+		if (current_path == null)
+			return;
+
+		current_path.cubicTo(x2, y2, x3, y3, x4, y4);
+
+		current_path_vertex_num++;
+	}
+
+	protected void endShape() {
+		if (current_path == null)
+			return;
+
+		if (enable_fill) {
+			cc.drawPath(current_path, getFillPaint());
+		}
+		if (enable_stroke) {
+			cc.drawPath(current_path, getStrokePaint());
+		}
+	}
+
+	//
 	// for text drawing
-	PFont current_pfont = new PFont("none", 12);
+	//
+	PFont current_pfont = new PFont("dummy", 12);
 
 	protected PFont createFont(String fontname, int size) {
 		PFont pfont = new PFont(fontname, size);
@@ -226,7 +280,7 @@ public abstract class PseudoP5View extends SurfaceView implements
 		p.setTextSize(this.current_pfont.getSize());
 		cc.drawText(str, x, y, p);
 	}
-	
+
 	// matrix operations
 	protected void pushMatrix() {
 		cc.save();
