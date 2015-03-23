@@ -496,8 +496,15 @@ public abstract class PseudoP5View extends SurfaceView implements
 	private boolean adjustSketchScale() {
 		cc.save();
 
-		int view_w = getWidth();
-		int view_h = getHeight();
+		int view_w, view_h;
+		if (pseudo_portrait_mode == true) {
+			view_w = getHeight();
+			view_h = getWidth();
+		}
+		else {
+			view_w = getWidth();
+			view_h = getHeight();
+		}
 
 		if (view_w == 0 || view_h == 0)
 			return false;
@@ -516,16 +523,24 @@ public abstract class PseudoP5View extends SurfaceView implements
 			screen_offset_x = 0.0f;
 			screen_offset_y = (view_h - height * screen_offset_scale) / 2;
 		}
-
+		
 		Matrix mat_trans = new Matrix();
 		mat_trans.postTranslate(screen_offset_x, screen_offset_y);
+		cc.concat(mat_trans);
 
 		Matrix mat_scale = new Matrix();
 		mat_scale.postScale(screen_offset_scale, screen_offset_scale);
-
-		cc.concat(mat_trans);
 		cc.concat(mat_scale);
 
+		if (pseudo_portrait_mode) {
+			Matrix mat_rot = new Matrix();
+			mat_rot.postRotate(-90);
+			cc.concat(mat_rot);
+
+			Matrix mat_down_shift = new Matrix();
+			mat_down_shift.postTranslate(-width, 0);
+			cc.concat(mat_down_shift);
+		}
 		return true;
 	}
 
@@ -533,6 +548,12 @@ public abstract class PseudoP5View extends SurfaceView implements
 		cc.restore();
 	}
 
+	boolean pseudo_portrait_mode = false;
+	
+	public void setPseudoPortraitMode(boolean flag) {
+		this.pseudo_portrait_mode = flag;
+	}
+	
 	/////////////////////////////////////////////////////////////////////////////
 	//
 	// events
@@ -544,6 +565,11 @@ public abstract class PseudoP5View extends SurfaceView implements
 		float screen_x = evt.getX();
 		float screen_y = evt.getY();
 
+		if (pseudo_portrait_mode) {
+			screen_x = getHeight() - evt.getY();
+			screen_y = evt.getX();
+		}
+		
 		mouseX = (screen_x - screen_offset_x) / screen_offset_scale;
 		mouseY = (screen_y - screen_offset_y) / screen_offset_scale;
 
