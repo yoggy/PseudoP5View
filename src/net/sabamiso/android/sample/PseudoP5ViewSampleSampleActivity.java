@@ -1,6 +1,7 @@
 package net.sabamiso.android.sample;
 
 import android.app.Activity;
+import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
@@ -13,13 +14,14 @@ public class PseudoP5ViewSampleSampleActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
+		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
 		super.onCreate(savedInstanceState);
 		
 		view = new SampleView(this);
 		setContentView(view);
-
+		
 		view.setup(); // don't forget to call setup()!
 	}
 

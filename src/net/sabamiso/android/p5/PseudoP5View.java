@@ -493,11 +493,29 @@ public abstract class PseudoP5View extends SurfaceView implements
 		}
 	}
 
+	//
+	// 
+	//
+	public static final int PSEUDO_PORTRAIT_MODE_0 = 0;
+	public static final int PSEUDO_PORTRAIT_MODE_90 = 1;
+	public static final int PSEUDO_PORTRAIT_MODE_270 = 2;
+
+	int pseudo_portrait_mode = PSEUDO_PORTRAIT_MODE_0;
+	
+	public void setPseudoPortraitMode(int val) {
+		if (val < 0 || 2 < val) return;
+		this.pseudo_portrait_mode = val;
+	}
+	
 	private boolean adjustSketchScale() {
 		cc.save();
 
 		int view_w, view_h;
-		if (pseudo_portrait_mode == true) {
+		if (pseudo_portrait_mode == PSEUDO_PORTRAIT_MODE_90) {
+			view_w = getHeight();
+			view_h = getWidth();
+		}
+		else if (pseudo_portrait_mode == PSEUDO_PORTRAIT_MODE_270) {
 			view_w = getHeight();
 			view_h = getWidth();
 		}
@@ -532,7 +550,16 @@ public abstract class PseudoP5View extends SurfaceView implements
 		mat_scale.postScale(screen_offset_scale, screen_offset_scale);
 		cc.concat(mat_scale);
 
-		if (pseudo_portrait_mode) {
+		if (pseudo_portrait_mode == PSEUDO_PORTRAIT_MODE_90) {
+			Matrix mat_rot = new Matrix();
+			mat_rot.postRotate(90);
+			cc.concat(mat_rot);
+
+			Matrix mat_down_shift = new Matrix();
+			mat_down_shift.postTranslate(0, -height);
+			cc.concat(mat_down_shift);
+		}
+		else if (pseudo_portrait_mode == PSEUDO_PORTRAIT_MODE_270) {
 			Matrix mat_rot = new Matrix();
 			mat_rot.postRotate(-90);
 			cc.concat(mat_rot);
@@ -548,12 +575,6 @@ public abstract class PseudoP5View extends SurfaceView implements
 		cc.restore();
 	}
 
-	boolean pseudo_portrait_mode = false;
-	
-	public void setPseudoPortraitMode(boolean flag) {
-		this.pseudo_portrait_mode = flag;
-	}
-	
 	/////////////////////////////////////////////////////////////////////////////
 	//
 	// events
@@ -565,7 +586,11 @@ public abstract class PseudoP5View extends SurfaceView implements
 		float screen_x = evt.getX();
 		float screen_y = evt.getY();
 
-		if (pseudo_portrait_mode) {
+		if (pseudo_portrait_mode == PSEUDO_PORTRAIT_MODE_90) {
+			screen_x = evt.getY();
+			screen_y = getWidth() - evt.getX();
+		}
+		else if (pseudo_portrait_mode == PSEUDO_PORTRAIT_MODE_270) {
 			screen_x = getHeight() - evt.getY();
 			screen_y = evt.getX();
 		}
